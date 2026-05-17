@@ -1,0 +1,48 @@
+{
+    "name": "thomasvantuycom/statamic-brevo",
+    "description": "Create Brevo contacts from Statamic form submissions.",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "ThomasVantuycom\\StatamicBrevo\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ThomasVantuycom\\StatamicBrevo\\Tests\\": "tests"
+        }
+    },
+    "require": {
+        "statamic/cms": "^6.0",
+        "getbrevo/brevo-php": "^4.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.8",
+        "laravel/pint": "^1.29"
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    },
+    "extra": {
+        "download-dist": [
+            {
+                "url": "https://github.com/thomasvantuycom/statamic-brevo/releases/download/{$version}/dist.tar.gz",
+                "path": "resources/dist"
+            }
+        ],
+        "statamic": {
+            "name": "Brevo",
+            "description": "Create Brevo contacts from form submissions.",
+            "slug": "brevo"
+        },
+        "laravel": {
+            "providers": [
+                "ThomasVantuycom\\StatamicBrevo\\ServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -1,0 +1,5 @@
+@import "@statamic/cms/tailwind.css";
+
+@import "./components/fieldtypes/brevo-form-config.css";
+
+@source '../js/**/*.vue';

@@ -1,0 +1,7 @@
+.brevo_form_config-fieldtype {
+    @apply p-0;
+}
+
+.brevo_form_config-fieldtype label:has(.sr-only) {
+    @apply mbe-0;
+}
