@@ -18,7 +18,8 @@
         "pixelfear/composer-dist-plugin": "^0.1.6"
     },
     "require-dev": {
-        "orchestra/testbench": "^10.8",
+        "orchestra/testbench": "^10.8 || ^11.0",
+        "phpunit/phpunit": "^11.5.3 || ^12.0",
         "laravel/pint": "^1.29"
     },
     "config": {
