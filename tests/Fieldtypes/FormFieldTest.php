@@ -38,32 +38,33 @@ class FormFieldTest extends TestCase
         BlueprintFacade::shouldReceive('find')
             ->once()
             ->with('forms.subscribe')
-            ->andReturn(new Blueprint()
-                ->setContents([
-                    'fields' => [
-                        [
-                            'handle' => 'first_name',
-                            'field' => [
-                                'type' => 'text',
-                                'display' => 'First Name',
+            ->andReturn(
+                (new Blueprint)
+                    ->setContents([
+                        'fields' => [
+                            [
+                                'handle' => 'first_name',
+                                'field' => [
+                                    'type' => 'text',
+                                    'display' => 'First Name',
+                                ],
+                            ],
+                            [
+                                'handle' => 'last_name',
+                                'field' => [
+                                    'type' => 'text',
+                                    'display' => 'Last Name',
+                                ],
                             ],
                         ],
-                        [
-                            'handle' => 'last_name',
-                            'field' => [
-                                'type' => 'text',
-                                'display' => 'Last Name',
-                            ],
-                        ],
-                    ],
-                ])
+                    ])
             );
 
         FormFacade::shouldReceive('find')
             ->once()
             ->with('subscribe')
-            ->andReturn(new Form()
-                ->handle('subscribe')
+            ->andReturn(
+                (new Form)->handle('subscribe')
             );
 
         Request::swap(Request::create('/cp/forms/subscribe'));
@@ -90,8 +91,8 @@ class FormFieldTest extends TestCase
         FormFacade::shouldReceive('find')
             ->once()
             ->with('empty')
-            ->andReturn(new Form()
-                ->handle('empty')
+            ->andReturn(
+                (new Form)->handle('empty')
             );
 
         Request::swap(Request::create('/cp/forms/empty'));
