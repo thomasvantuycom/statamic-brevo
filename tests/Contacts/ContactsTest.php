@@ -152,6 +152,133 @@ class ContactsTest extends TestCase
         $this->assertSame(1, $client->getRequestCount());
     }
 
+    #[Test]
+    public function it_adds_conditional_lists_based_on_submitted_values(): void
+    {
+        $client = new MockHttpClient;
+        $client->append($this->response(['id' => 1]));
+
+        $contacts = new Contacts(new Brevo('apikey', ['client' => $client]));
+
+        $contacts->createFromSubmission($this->submission([
+            'email' => 'johndoe@email.com',
+            'topics' => ['banking', 'payments'],
+            'role' => 'partner',
+        ], [
+            'lists' => [1],
+            'email_field' => 'email',
+            'dynamic_lists' => true,
+            'conditional_lists' => [
+                ['field' => 'topics', 'value' => 'banking', 'lists' => [2]],
+                ['field' => 'topics', 'value' => 'payments', 'lists' => [3, 4]],
+                ['field' => 'topics', 'value' => 'commerce', 'lists' => [5]],
+                ['field' => 'role', 'value' => 'partner', 'lists' => [6]],
+                ['field' => 'role', 'value' => 'member', 'lists' => [7]],
+            ],
+        ]));
+
+        $this->assertSame([1, 2, 3, 4, 6], $this->requestBody($client->getLastRequest())['listIds']);
+    }
+
+    #[Test]
+    public function it_ignores_conditional_lists_when_dynamic_lists_are_disabled(): void
+    {
+        $client = new MockHttpClient;
+        $client->append($this->response(['id' => 1]));
+
+        $contacts = new Contacts(new Brevo('apikey', ['client' => $client]));
+
+        $contacts->createFromSubmission($this->submission([
+            'email' => 'johndoe@email.com',
+            'topics' => ['banking'],
+        ], [
+            'lists' => [1],
+            'email_field' => 'email',
+            'conditional_lists' => [
+                ['field' => 'topics', 'value' => 'banking', 'lists' => [2]],
+            ],
+        ]));
+
+        $this->assertSame([1], $this->requestBody($client->getLastRequest())['listIds']);
+    }
+
+    #[Test]
+    public function it_adds_conditional_lists_when_no_value_is_configured(): void
+    {
+        $client = new MockHttpClient;
+        $client->append($this->response(['id' => 1]));
+
+        $contacts = new Contacts(new Brevo('apikey', ['client' => $client]));
+
+        $contacts->createFromSubmission($this->submission([
+            'email' => 'johndoe@email.com',
+            'newsletter' => true,
+            'events' => false,
+            'topics' => [],
+        ], [
+            'lists' => [1],
+            'email_field' => 'email',
+            'dynamic_lists' => true,
+            'conditional_lists' => [
+                ['field' => 'newsletter', 'lists' => [2]],
+                ['field' => 'events', 'lists' => [3]],
+                ['field' => 'topics', 'lists' => [4]],
+            ],
+        ]));
+
+        $this->assertSame([1, 2], $this->requestBody($client->getLastRequest())['listIds']);
+    }
+
+    #[Test]
+    public function it_does_not_duplicate_lists_matched_by_multiple_rules(): void
+    {
+        $client = new MockHttpClient;
+        $client->append($this->response(['id' => 1]));
+
+        $contacts = new Contacts(new Brevo('apikey', ['client' => $client]));
+
+        $contacts->createFromSubmission($this->submission([
+            'email' => 'johndoe@email.com',
+            'topics' => ['banking', 'payments'],
+        ], [
+            'lists' => [1, 2],
+            'email_field' => 'email',
+            'dynamic_lists' => true,
+            'conditional_lists' => [
+                ['field' => 'topics', 'value' => 'banking', 'lists' => [2, 3]],
+                ['field' => 'topics', 'value' => 'payments', 'lists' => [3]],
+            ],
+        ]));
+
+        $this->assertSame([1, 2, 3], $this->requestBody($client->getLastRequest())['listIds']);
+    }
+
+    #[Test]
+    public function it_adds_conditional_lists_to_double_opt_in_contacts(): void
+    {
+        $client = new MockHttpClient;
+        $client->append($this->response([]));
+
+        $contacts = new Contacts(new Brevo('apikey', ['client' => $client]));
+
+        $contacts->createFromSubmission($this->submission([
+            'email' => 'johndoe@email.com',
+            'topics' => ['banking'],
+        ], [
+            'lists' => [1],
+            'email_field' => 'email',
+            'dynamic_lists' => true,
+            'conditional_lists' => [
+                ['field' => 'topics', 'value' => 'banking', 'lists' => [2]],
+            ],
+            'use_double_opt_in' => true,
+            'template' => 3,
+            'redirection_url' => 'https://www.example.com/thanks',
+        ]));
+
+        $this->assertSame([1, 2], $this->requestBody($client->getLastRequest())['includeListIds']);
+    }
+
     protected function submission(array $data, array $brevoConfig): Submission
     {
         $form = (new Form)

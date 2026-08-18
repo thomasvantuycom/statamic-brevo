@@ -5,6 +5,7 @@ namespace ThomasVantuycom\StatamicBrevo\Contacts;
 use Brevo\Brevo;
 use Brevo\Contacts\Requests\CreateContactRequest;
 use Brevo\Contacts\Requests\CreateDoiContactRequest;
+use Illuminate\Support\Collection;
 use Statamic\Forms\Submission;
 
 class Contacts
@@ -55,7 +56,7 @@ class Contacts
             }
         }
 
-        $lists = $config->get('lists');
+        $lists = $this->resolveLists($config, $submission);
         $email = $submission->get($config->get('email_field'));
         $attributes = collect($config->get('attribute_fields'))
             ->map(fn ($item) => [$item['attribute'] => $submission->get($item['field'])])
@@ -84,5 +85,36 @@ class Contacts
             email: $email,
             attributes: $attributes
         );
+    }
+
+    protected function resolveLists(Collection $config, Submission $submission): array
+    {
+        $lists = collect($config->get('lists'));
+
+        if ($config->get('dynamic_lists', false)) {
+            $lists = $lists->merge(
+                collect($config->get('conditional_lists'))
+                    ->filter(fn ($rule) => $this->matchesRule($rule, $submission))
+                    ->flatMap(fn ($rule) => $rule['lists'] ?? [])
+            );
+        }
+
+        return $lists->unique()->values()->all();
+    }
+
+    protected function matchesRule(array $rule, Submission $submission): bool
+    {
+        $value = $submission->get($rule['field'] ?? null);
+        $expected = $rule['value'] ?? null;
+
+        if ($expected === null || $expected === '') {
+            return is_array($value)
+                ? ! empty($value)
+                : filter_var($value, FILTER_VALIDATE_BOOL);
+        }
+
+        return is_array($value)
+            ? in_array($expected, array_map(strval(...), $value), true)
+            : (string) $value === (string) $expected;
     }
 }
