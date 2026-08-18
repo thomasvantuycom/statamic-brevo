@@ -73,6 +73,15 @@ class ServiceProvider extends AddonServiceProvider
                         ],
                     ],
                     [
+                        'handle' => 'dynamic_lists',
+                        'field' => [
+                            'type' => 'toggle',
+                            'display' => __('Dynamic Lists'),
+                            'instructions' => __('brevo::messages.form_configure_brevo_dynamic_lists_instructions'),
+                            'if' => ['enabled' => true],
+                        ],
+                    ],
+                    [
                         'handle' => 'lists',
                         'field' => [
                             'type' => 'brevo_lists',
@@ -80,7 +89,49 @@ class ServiceProvider extends AddonServiceProvider
                             'instructions' => __('brevo::messages.form_configure_brevo_lists_instructions'),
                             'multiple' => true,
                             'if' => ['enabled' => true],
-                            'validate' => ['sometimes', 'required'],
+                            'validate' => ['sometimes', 'required_unless:brevo.dynamic_lists,true'],
+                        ],
+                    ],
+                    [
+                        'handle' => 'conditional_lists',
+                        'field' => [
+                            'type' => 'grid',
+                            'display' => __('Conditional Lists'),
+                            'instructions' => __('brevo::messages.form_configure_brevo_conditional_lists_instructions'),
+                            'mode' => 'table',
+                            'add_row' => __('Add Rule'),
+                            'fullscreen' => false,
+                            'full_width_setting' => true,
+                            'if' => ['enabled' => true, 'dynamic_lists' => true],
+                            'fields' => [
+                                [
+                                    'handle' => 'field',
+                                    'field' => [
+                                        'display' => __('Field'),
+                                        'type' => 'form_field',
+                                        'width' => 33,
+                                        'validate' => ['required'],
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'value',
+                                    'field' => [
+                                        'display' => __('Value'),
+                                        'type' => 'text',
+                                        'width' => 33,
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'lists',
+                                    'field' => [
+                                        'display' => __('Lists'),
+                                        'type' => 'brevo_lists',
+                                        'multiple' => true,
+                                        'width' => 33,
+                                        'validate' => ['required'],
+                                    ],
+                                ],
+                            ],
                         ],
                     ],
                     [

@@ -30,6 +30,7 @@ Open a form in the Statamic control panel. The addon adds a **Brevo** section to
 Enable **Create Contacts**, then configure:
 
 - **Lists**: the Brevo lists the contact should be added to.
+- **Dynamic Lists**: optionally add contacts to lists based on what they submitted.
 - **Email Field**: the Statamic form field containing the contact email address.
 - **Attribute Fields**: optional mappings from Statamic form fields to Brevo contact attributes.
 - **Opt-in Field**: optional field that must evaluate to true before a contact is created.
@@ -49,7 +50,27 @@ For example:
 
 Attributes are optional. If no attributes are configured, the contact is still created with the selected lists and email address.
 
-## Opt-in Field
+## Dynamic Lists
+
+Enable **Dynamic Lists** to add contacts to different lists depending on what they submitted, for example when a form lets people pick which newsletters they want.
+
+With dynamic lists enabled, **Lists** becomes optional. Contacts are always added to the lists selected there, so leave it empty when the lists should be determined by the submission alone.
+
+Each rule under **Conditional Lists** maps a form field and an expected value to one or more lists:
+
+| Field | Value | Lists |
+| --- | --- | --- |
+| `topics` | `banking` | Banking newsletter |
+| `topics` | `payments` | Payments newsletter |
+| `role` | `partner` | Partner updates |
+
+Rules are evaluated against the submission:
+
+- If the submitted value is an array, such as a checkboxes field, the rule matches when the value is one of the selected options. Selecting both `banking` and `payments` therefore adds the contact to both newsletters.
+- If the submitted value is a single value, the rule matches when it equals the configured value.
+- If the value is left blank, the rule matches whenever the field is truthy or a non-empty array. This is useful for toggles.
+
+All matching rules are combined with the lists selected in **Lists**, and duplicates are removed. Dynamic lists apply to both regular and double opt-in contacts.
 
 If an **Opt-in Field** is configured, the addon checks the submitted value before creating the contact.
 
